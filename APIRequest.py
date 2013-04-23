@@ -1,23 +1,11 @@
+from db_session import Base, load_session
 import requests
-from sqlalchemy import create_engine
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker
-
-engine = create_engine('postgresql://localhost:5432/carnot', echo=True)
-Base = declarative_base(engine)
 
 
 class APIRequestModel(Base):
     """"""
     __tablename__ = 'responses'
     __table_args__ = {'autoload': True}
-
-
-def load_session():
-    """"""
-    Session = sessionmaker(bind=engine)
-    session = Session()
-    return session
 
 
 class APIRequest(object):
