@@ -8,27 +8,32 @@ class APIRequestModel(Base):
     __table_args__ = {'autoload': True}
 
 
+def fetch_requests():
+
+    return {}
+
+
 class APIRequest(object):
     """Handles making API requests"""
 
     def __init__(self,
-                 http_method,
-                 url,
+                 id=None,
+                 http_method=None,
+                 url=None,
                  data=None,
                  params=None,
                  headers=None):
 
         self.http_method = http_method
         self.url = url
-        self.data = data
-        self.params = params
-        self.headers = headers
+        self.data = data or {}
+        self.params = params or {}
+        self.headers = headers or {}
         self.elapsed = None
 
     def __repr__(self):
         return '<{} {} ({} seconds)>'.format(self.http_method.upper(),
-                                             self.url,
-                                             self.elapsed)
+                                             self.url)
 
     def make_request(self):
         """Makes the request, updates elapsed time"""
