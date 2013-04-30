@@ -1,5 +1,8 @@
 from db_session import Base, load_session
 from sqlalchemy import Column, Integer, String
+from sqlalchemy.orm import relationship
+from api_test_result import save_api_test_result
+import requests
 
 session = load_session()
 
@@ -14,17 +17,21 @@ class APITest(Base):
     body = Column('body', String)
     params = Column('params', String)
 
+    api_test = relationship("APITestResult", backref='responses')
+
+
+
     def __init__(self,
-                 http_method,
-                 uri,
                  id=None,
+                 http_method=None,
+                 uri=None,
                  headers=None,
                  body=None,
                  params=None):
 
+        self.id = id
         self.http_method = http_method
         self.uri = uri
-        self.id = id
         self.headers = headers or ''
         self.body = body or ''
         self.params = params or ''
@@ -33,17 +40,22 @@ class APITest(Base):
 
         return '<APITest {} {}>'.format(self.http_method, self.uri)
 
-    def run_test():
+    def run_test(self):
 
-        return 'ran test'
+        headers = {'Authorization': 'Bearer hSjjh5cxzvAjRgAIwsjh1rF1nH0hiifz'}
+        response = requests.request(self.http_method,
+                                    self.uri,
+                                    headers=headers)
 
-    def save_test():
-
-        return
+        if response.status_code == requests.codes.ok:
+            print response.json()
+            save_api_test_result(self.id,
+                                 response.elapsed.total_seconds())
 
 def fetch_api_tests():
 
     all_api_tests = session.query(
+        APITest.id,
         APITest.http_method,
         APITest.uri,
         APITest.headers,
@@ -60,12 +72,10 @@ def create_api_test(http_method,
                     body=None,
                     params=None):
 
-    new_api_test = session.add(APITest(http_method,
-                                       uri,
-                                       headers=None,
-                                       body=None,
-                                       params=None))
+    new_api_test = APITest(http_method=http_method,
+                           uri=uri)
 
+    session.add(new_api_test)
     session.commit()
 
     return new_api_test
